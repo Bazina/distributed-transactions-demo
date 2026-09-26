@@ -29,10 +29,10 @@ curl -s -X POST "$BOOKING/saga/$SID/resume"; echo
 state
 
 say "run 4, the same charge step arrives twice"
-BID=$($MYSQL -N -e "SELECT id FROM bookingdb.bookings WHERE gid='$SID';")
+BID=$($MYSQL -N -e "SELECT id FROM bookingdb.bookings WHERE transaction_id='$SID';")
 BAL_BEFORE=$($MYSQL -N -e "SELECT balance FROM paymentdb.wallets WHERE user_id=1;")
 curl -s -X POST "$PAYMENT/payments/charge" -H "$JSON" \
-  -d "{\"gid\":\"$SID\",\"bookingId\":$BID,\"userId\":1,\"amount\":50.00}"; echo
+  -d "{\"transactionId\":\"$SID\",\"bookingId\":$BID,\"userId\":1,\"amount\":50.00}"; echo
 BAL_AFTER=$($MYSQL -N -e "SELECT balance FROM paymentdb.wallets WHERE user_id=1;")
 note "balance before $BAL_BEFORE, after $BAL_AFTER"
 note "UNIQUE(booking_id) claims the charge before the money moves, so the replay is a no-op."

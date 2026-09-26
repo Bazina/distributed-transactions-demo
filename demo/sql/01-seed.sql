@@ -48,7 +48,7 @@ ALTER TABLE payments AUTO_INCREMENT = 1;
 -- "no" vote in phase one without faking anything.
 INSERT INTO wallets (user_id, balance) VALUES
     (1, 500.00),
-    (2,  10.00);
+    (2,  50.00);
 
 USE accountingdb;
 

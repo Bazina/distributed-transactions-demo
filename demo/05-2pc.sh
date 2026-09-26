@@ -10,7 +10,7 @@ curl -s -X POST "$BOOKING/bookings/2pc?amount=120.00" -H "$JSON" \
 state
 note "all three rows appeared together. No reader ever saw a half state."
 
-say "run 2, user 2 has 10.00 and the booking costs 120.00"
+say "run 2, user 2 has 50.00 and the booking costs 120.00"
 note "the CHECK on wallets.balance is what makes this a real no vote"
 curl -s -X POST "$BOOKING/bookings/2pc?amount=120.00" -H "$JSON" \
   -d "$(book 102 2 '2026-09-27 12:00:00' '2026-09-27 13:00:00')"; echo
