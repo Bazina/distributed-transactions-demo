@@ -48,14 +48,33 @@ public class BookingRepository {
         }
     }
 
-    /** Locks every slot row the booking covers, so the phantom has a body. */
-    public void lockSlots(Connection connection, BookingRequest request) throws SQLException {
+    /**
+     * Locks every slot row the booking covers, so the phantom has a body.
+     *
+     * Locking nothing is not a quiet success. If the slots were never seeded
+     * for this range the booking would fall back to a plain check and insert,
+     * and the demo would double book while looking like it was protected.
+     *
+     * @return how many slot rows are now locked
+     */
+    public int lockSlots(Connection connection, BookingRequest request) throws SQLException {
+        int locked = 0;
         try (PreparedStatement lock = connection.prepareStatement(LOCK_SLOTS)) {
             lock.setInt(1, request.roomId());
             lock.setString(2, request.startsAt());
             lock.setString(3, request.endsAt());
-            lock.executeQuery().close();
+            try (ResultSet rows = lock.executeQuery()) {
+                while (rows.next()) {
+                    locked++;
+                }
+            }
         }
+        if (locked == 0) {
+            throw new IllegalStateException("no slot rows for room " + request.roomId()
+                    + " between " + request.startsAt() + " and " + request.endsAt()
+                    + ". Reseed with demo/sql/01-seed.sql.");
+        }
+        return locked;
     }
 
     /**

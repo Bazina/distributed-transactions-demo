@@ -39,7 +39,8 @@ public class BookingStrategies {
     /** Lock the slot rows first, so there is something to wait on. DDIA p.251. */
     public long materialized(BookingRequest request, long pauseMs) {
         return timed("materialized", () -> database.transaction(connection -> {
-            bookings.lockSlots(connection, request);
+            logger.info("locked {} slot rows for room {}",
+                    bookings.lockSlots(connection, request), request.roomId());
             rejectIfTaken(connection, request);
             pause(pauseMs);
             return bookings.insert(connection, request, "CONFIRMED", null, 0);

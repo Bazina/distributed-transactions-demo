@@ -2,7 +2,7 @@
 # DDIA p.257 to 260. Let the database do it, and pay for it.
 set -e
 cd "$(dirname "$0")"; source lib.sh; ./reset.sh > /dev/null
-B=$(book 101 1 "2026-09-27 12:00:00" "2026-09-27 13:00:00")
+B=$(book 101 1 "$DAY 12:00:00" "$DAY 13:00:00")
 
 say "same race at SERIALIZABLE, no helper table"
 note "InnoDB turns the reads into locking reads and uses next-key locks on the gap"

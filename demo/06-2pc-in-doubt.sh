@@ -8,7 +8,7 @@ curl -s -X POST "$BOOKING/admin/fail-mode?mode=CRASH_AFTER_VOTES"; echo
 
 say "booking room 101"
 curl -s -X POST "$BOOKING/bookings/2pc?amount=120.00" -H "$JSON" \
-  -d "$(book 101 1 '2026-09-27 12:00:00' '2026-09-27 13:00:00')"; echo
+  -d "$(book 101 1 '$DAY 12:00:00' '$DAY 13:00:00')"; echo
 
 say "every participant is now in doubt, and none may decide alone"
 curl -s "$BOOKING/admin/in-doubt"; echo

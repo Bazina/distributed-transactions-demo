@@ -7,6 +7,10 @@ ACCOUNTING=http://localhost:8082
 MYSQL="mysql -u root"
 JSON='Content-Type: application/json'
 
+# The seed creates slot rows for today and tomorrow, so the demos must book
+# today. Hardcoded dates go stale and make materialized lock nothing.
+DAY=$(date +%F)
+
 say ()  { printf '\n\033[1;36m== %s\033[0m\n' "$*"; }
 note () { printf '\033[0;90m   %s\033[0m\n' "$*"; }
 book () { printf '{"roomId":%s,"userId":%s,"startsAt":"%s","endsAt":"%s"}' "$1" "$2" "$3" "$4"; }

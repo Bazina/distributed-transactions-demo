@@ -2,8 +2,8 @@
 # DDIA p.301 to 304, figure 8-5.
 set -e
 cd "$(dirname "$0")"; source lib.sh; ./reset.sh > /dev/null
-B1=$(book 101 1 "2026-09-27 15:00:00" "2026-09-27 16:00:00")
-B2=$(book 101 2 "2026-09-27 15:00:00" "2026-09-27 16:00:00")
+B1=$(book 101 1 "$DAY 15:00:00" "$DAY 16:00:00")
+B2=$(book 101 2 "$DAY 15:00:00" "$DAY 16:00:00")
 
 say "client 1 takes a 3 second lease on room 101"
 T1=$(curl -s -X POST "$BOOKING/locks/acquire?lockName=room:101&owner=client-1&ttlSeconds=3" \

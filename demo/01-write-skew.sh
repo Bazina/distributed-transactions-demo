@@ -2,7 +2,7 @@
 # DDIA p.249. Check then insert, under REPEATABLE READ, twice at once.
 set -e
 cd "$(dirname "$0")"; source lib.sh; ./reset.sh > /dev/null
-B=$(book 101 1 "2026-09-27 12:00:00" "2026-09-27 13:00:00")
+B=$(book 101 1 "$DAY 12:00:00" "$DAY 13:00:00")
 
 say "two people book room 101 for 12:00 to 13:00, at the same time"
 note "both check for an overlap, both see zero, both insert"
