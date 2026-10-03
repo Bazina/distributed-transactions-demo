@@ -10,9 +10,6 @@ import java.util.Map;
 
 /**
  * A participant reached over HTTP.
- *
- * Deliberately not wrapped in Hystrix: a retried prepare would charge twice and
- * a fallback would hide the in-doubt state we are trying to show.
  */
 public class RemoteParticipant {
     private static final Logger logger = LoggerFactory.getLogger(RemoteParticipant.class);
