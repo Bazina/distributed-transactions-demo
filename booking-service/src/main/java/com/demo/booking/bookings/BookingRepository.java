@@ -9,6 +9,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.Optional;
 
 /** All the SQL for bookings. No policy, no transactions. */
 @Repository
@@ -147,6 +148,30 @@ public class BookingRepository {
 
     public long nextId() {
         return database.transaction(this::nextId);
+    }
+
+    /**
+     * @return the booking, so a resumed saga can rebuild the request it started from
+     */
+    public Optional<BookingRow> find(long bookingId) {
+        return database.transaction(connection -> {
+            try (PreparedStatement read = connection.prepareStatement(
+                    "SELECT id, room_id, user_id, starts_at, ends_at, status FROM bookings WHERE id = ?")) {
+                read.setLong(1, bookingId);
+                try (ResultSet row = read.executeQuery()) {
+                    if (!row.next()) {
+                        return Optional.<BookingRow>empty();
+                    }
+                    return Optional.of(new BookingRow(
+                            row.getLong("id"), row.getInt("room_id"), row.getInt("user_id"),
+                            row.getString("starts_at"), row.getString("ends_at"), row.getString("status")));
+                }
+            }
+        });
+    }
+
+    public record BookingRow(long id, int roomId, int userId,
+                             String startsAt, String endsAt, String status) {
     }
 
     public void updateStatus(long bookingId, String status) {
