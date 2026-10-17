@@ -14,12 +14,16 @@ DAY=$(date +%F)
 say ()  { printf '\n\033[1;36m== %s\033[0m\n' "$*"; }
 note () { printf '\033[0;90m   %s\033[0m\n' "$*"; }
 book () { printf '{"roomId":%s,"userId":%s,"startsAt":"%s","endsAt":"%s"}' "$1" "$2" "$3" "$4"; }
+show () {
+  printf '\n   %s\n' "$1"
+  $MYSQL -t -e "SELECT $2 FROM $1" | sed 's/^/   /'
+}
+
 state () {
-  $MYSQL -N -e "
-    SELECT CONCAT('  booking ', id, '  room ', room_id, '  ', status) FROM bookingdb.bookings;
-    SELECT CONCAT('  wallet  user ', user_id, '  ', balance) FROM paymentdb.wallets;
-    SELECT CONCAT('  payment booking ', booking_id, '  ', status) FROM paymentdb.payments;
-    SELECT CONCAT('  ledger  booking ', booking_id, '  ', kind, ' ', amount) FROM accountingdb.ledger;"
+  show bookingdb.bookings  "id, room_id, user_id, starts_at, ends_at, status, transaction_id"
+  show paymentdb.wallets   "user_id, balance"
+  show paymentdb.payments  "id, booking_id, user_id, amount, status, transaction_id"
+  show accountingdb.ledger "id, booking_id, kind, amount, transaction_id"
 }
 
 # Fire the same booking twice at once and label the answers, so it is obvious

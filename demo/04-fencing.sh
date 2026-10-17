@@ -25,6 +25,8 @@ say "client 1 wakes up, still believing it holds the lock, and writes with token
 printf '   '; cat /tmp/fence-c1; echo
 
 say "what is in the database"
-$MYSQL bookingdb -e "SELECT id, user_id, fence_token FROM bookings; SELECT room_id, fence_token AS high_water FROM rooms WHERE room_id=101;"
+show bookingdb.bookings "id, room_id, user_id, fence_token"
+show bookingdb.rooms    "room_id, name, fence_token"
+show bookingdb.lock_lease "lock_name, owner, token, expires_at"
 note "the rejection happened in the booking table, not in client 1."
 note "Client 1 could not have checked for itself, it did not know it had been paused."

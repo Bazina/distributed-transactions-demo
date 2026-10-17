@@ -6,18 +6,18 @@ cd "$(dirname "$0")"; source lib.sh; ./reset.sh > /dev/null
 say "run 1, happy path"
 note "watch the rows appear one at a time, not together"
 curl -s -X POST "$BOOKING/bookings/saga?amount=120.00" -H "$JSON" \
-  -d "$(book 101 1 '$DAY 09:00:00' '$DAY 10:00:00')"; echo
+  -d "$(book 101 1 "$DAY 09:00:00" "$DAY 10:00:00")"; echo
 state
 
 say "run 2, accounting fails at step 3"
 curl -s -X POST "$BOOKING/bookings/saga?amount=120.00&failAt=3" -H "$JSON" \
-  -d "$(book 102 1 '$DAY 09:00:00' '$DAY 10:00:00')"; echo
+  -d "$(book 102 1 "$DAY 09:00:00" "$DAY 10:00:00")"; echo
 state
 note "booking CANCELLED, payment REFUNDED. The refund is a new state, not a deleted row."
 
 say "run 3, the orchestrator is killed after step 2"
 R=$(curl -s -X POST "$BOOKING/bookings/saga?amount=50.00&killAt=2" -H "$JSON" \
-    -d "$(book 101 1 '$DAY 18:00:00' '$DAY 19:00:00')")
+    -d "$(book 101 1 "$DAY 18:00:00" "$DAY 19:00:00")")
 echo "$R"
 SID=$(echo "$R" | sed 's/.*"sagaId":"\([^"]*\)".*/\1/')
 state
