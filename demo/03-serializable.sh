@@ -6,9 +6,7 @@ B=$(book 101 1 "$DAY 12:00:00" "$DAY 13:00:00")
 
 say "same race at SERIALIZABLE, no helper table"
 note "InnoDB turns the reads into locking reads and uses next-key locks on the gap"
-curl -s -X POST "$BOOKING/bookings/serializable?pauseMs=600" -H "$JSON" -d "$B" &
-curl -s -X POST "$BOOKING/bookings/serializable?pauseMs=600" -H "$JSON" -d "$B" &
-wait; echo
+race "$BOOKING/bookings/serializable?pauseMs=600" "$B"
 
 say "the bookings table"
 $MYSQL bookingdb -e "SELECT id, room_id, status FROM bookings;"

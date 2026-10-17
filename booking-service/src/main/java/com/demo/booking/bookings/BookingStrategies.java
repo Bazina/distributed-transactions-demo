@@ -36,7 +36,19 @@ public class BookingStrategies {
         }));
     }
 
-    /** Lock the slot rows first, so there is something to wait on. DDIA p.251. */
+    /**
+     * Lock the slot rows first, so there is something to wait on. DDIA p.251.
+     *
+     * The order matters twice. The obvious reason is that the lock makes the
+     * second request wait. The other reason is that InnoDB creates the
+     * REPEATABLE READ snapshot at the first consistent read, and FOR UPDATE is
+     * not one. So the snapshot is taken after the lock is granted, which is
+     * after the winner committed, and only then does the check see their row.
+     *
+     * Put any plain SELECT above lockSlots and the snapshot is created too
+     * early. The check then reads a world where the other booking does not
+     * exist, and this quietly double books again.
+     */
     public long materialized(BookingRequest request, long pauseMs) {
         return timed("materialized", () -> database.transaction(connection -> {
             logger.info("locked {} slot rows for room {}",

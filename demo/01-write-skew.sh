@@ -6,9 +6,7 @@ B=$(book 101 1 "$DAY 12:00:00" "$DAY 13:00:00")
 
 say "two people book room 101 for 12:00 to 13:00, at the same time"
 note "both check for an overlap, both see zero, both insert"
-curl -s -X POST "$BOOKING/bookings/naive?pauseMs=600" -H "$JSON" -d "$B" & 
-curl -s -X POST "$BOOKING/bookings/naive?pauseMs=600" -H "$JSON" -d "$B" &
-wait; echo
+race "$BOOKING/bookings/naive?pauseMs=600" "$B"
 
 say "the bookings table"
 $MYSQL bookingdb -e "SELECT id, room_id, starts_at, ends_at, status FROM bookings;"

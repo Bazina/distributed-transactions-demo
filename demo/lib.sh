@@ -21,3 +21,14 @@ state () {
     SELECT CONCAT('  payment booking ', booking_id, '  ', status) FROM paymentdb.payments;
     SELECT CONCAT('  ledger  booking ', booking_id, '  ', kind, ' ', amount) FROM accountingdb.ledger;"
 }
+
+# Fire the same booking twice at once and label the answers, so it is obvious
+# on a projector which request won and which one lost.
+race () {
+  local url=$1 body=$2
+  curl -s -X POST "$url" -H "$JSON" -d "$body" > /tmp/race-A &
+  curl -s -X POST "$url" -H "$JSON" -d "$body" > /tmp/race-B &
+  wait
+  printf '   request A: %s\n' "$(cat /tmp/race-A)"
+  printf '   request B: %s\n' "$(cat /tmp/race-B)"
+}

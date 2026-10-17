@@ -6,9 +6,7 @@ B=$(book 101 1 "$DAY 12:00:00" "$DAY 13:00:00")
 
 say "same race, but each request locks the 15 minute slot rows first"
 note "room_slot_lock holds no booking data. It exists only to be locked."
-curl -s -X POST "$BOOKING/bookings/materialized?pauseMs=600" -H "$JSON" -d "$B" &
-curl -s -X POST "$BOOKING/bookings/materialized?pauseMs=600" -H "$JSON" -d "$B" &
-wait; echo
+race "$BOOKING/bookings/materialized?pauseMs=600" "$B"
 
 say "the bookings table"
 $MYSQL bookingdb -e "SELECT id, room_id, status FROM bookings;"
