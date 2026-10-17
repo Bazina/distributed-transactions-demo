@@ -1,6 +1,7 @@
 package com.demo.booking.web;
 
 import com.demo.booking.model.BookingRequest;
+import com.demo.booking.saga.FailureInjection;
 import com.demo.booking.saga.SagaOrchestrator;
 import com.demo.booking.twopc.Coordinator;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -38,7 +39,7 @@ public class DistributedController {
                                            @RequestParam(defaultValue = "120.00") BigDecimal amount,
                                            @RequestParam(defaultValue = "0") int failAt,
                                            @RequestParam(defaultValue = "0") int killAt) {
-        return saga.book(request, amount, failAt, killAt);
+        return saga.book(request, amount, new FailureInjection(failAt, killAt));
     }
 
     @PostMapping("/saga/{sagaId}/resume")
