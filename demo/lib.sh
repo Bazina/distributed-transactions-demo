@@ -26,21 +26,29 @@ steps ()    { show bookingdb.saga_log "step_no, step_name, state, booking_id, am
 decision () { show bookingdb.tx_log   "transaction_id, decision, updated_at" "ORDER BY updated_at"; }
 
 # Every line any of the three services wrote for one transaction, merged in
-# time order. The same panel the slides draw beside the animation.
+# time order. The same panel the slides draw beside the animation, and the same
+# colours: booking blue, payment orange, accounting purple. The message colour
+# is the outcome, so a NO vote is readable from the back of the room.
 trace () {
-  printf '\n   trace %s\n' "$1"
+  printf '\n   \033[1mtrace %s\033[0m\n' "$1"
   for service in booking payment accounting; do
     case $service in
-      booking)    tag=BOOKING ;;
-      payment)    tag=PAYMENT ;;
-      accounting) tag=ACCOUNT ;;
+      booking)    tag=BOOKING; hue=75  ;;
+      payment)    tag=PAYMENT; hue=214 ;;
+      accounting) tag=ACCOUNT; hue=141 ;;
     esac
     # -a because a killed service can leave a NUL byte in its log, and grep
     # then reports "Binary file matches" instead of the lines.
     grep -ha "$1" "$ROOT/.run/$service-service.log" 2>/dev/null |
-      awk -v tag="$tag" '{ time = $1; $1 = $2 = $3 = $4 = ""; sub(/^ +/, ""); print time "  " tag "  " $0 }'
-  # Stable, on the time field only. A plain sort breaks ties by comparing the
-  # message text, which put XA COMMIT before the decision that authorised it.
+      awk -v tag="$tag" -v hue="$hue" -v id="$1" '{
+        time = $1; $1 = $2 = $3 = $4 = ""; sub(/^ +/, "")
+        sub("^" id " ", "")   # already in the header, once is enough
+        if ($0 ~ /decision [A-Z]+ is on disk|recovering as/)                      msg = "\033[1;33m"
+        else if ($0 ~ /vote NO|FAILED|ROLLBACK|failing on purpose|dies|walking away|compensat|retry/) msg = "\033[0;31m"
+        else if ($0 ~ /vote YES|XA COMMIT|committed|confirmed|no-op/)             msg = "\033[0;32m"
+        else                                                                      msg = "\033[0m"
+        printf "\033[0;90m%s\033[0m  \033[38;5;%sm%-7s\033[0m  %s%s\033[0m\n", time, hue, tag, msg, $0
+      }'
   done | sort -s -k1,1 | sed 's/^/   /'
 }
 
