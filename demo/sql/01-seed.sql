@@ -1,17 +1,8 @@
--- Seed data for the demo. Safe to run repeatedly.
--- Run:  mysql -u root < demo/sql/01-seed.sql
+-- Seed data for the demo. Inserts only, so it expects empty tables.
+-- 02-clean.sql empties them, and reset.sh runs the two in order.
+-- Run:  mysql -u root < demo/sql/02-clean.sql && mysql -u root < demo/sql/01-seed.sql
 
 USE bookingdb;
-
-DELETE FROM bookings;
-DELETE FROM room_slot_lock;
-DELETE FROM lock_lease;
-DELETE FROM tx_log;
-DELETE FROM saga_log;
-DELETE FROM rooms;
-
--- Ids restart at 1 every run, so the tables stay readable on a projector.
-ALTER TABLE bookings AUTO_INCREMENT = 1;
 
 INSERT INTO rooms (room_id, name, fence_token) VALUES
     (101, 'Room 101', 0),
@@ -40,10 +31,6 @@ INSERT INTO lock_lease (lock_name, owner, token, expires_at) VALUES
 
 USE paymentdb;
 
-DELETE FROM payments;
-DELETE FROM wallets;
-ALTER TABLE payments AUTO_INCREMENT = 1;
-
 -- user 1 can afford a booking, user 2 cannot. user 2 is how we get a real
 -- "no" vote in phase one without faking anything.
 INSERT INTO wallets (user_id, balance) VALUES
@@ -51,9 +38,6 @@ INSERT INTO wallets (user_id, balance) VALUES
     (2,  50.00);
 
 USE accountingdb;
-
-DELETE FROM ledger;
-ALTER TABLE ledger AUTO_INCREMENT = 1;
 
 SELECT 'seeded' AS status,
        (SELECT COUNT(*) FROM bookingdb.rooms)          AS rooms,

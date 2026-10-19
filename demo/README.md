@@ -13,7 +13,10 @@ Requires a JDK 17. If yours is not at the Homebrew path, set `JAVA_HOME` first.
 
 ## The scripts, in lecture order
 
-Each one resets the databases first, so they can be run in any order and repeated.
+Each one runs `reset.sh` first, which empties every table (`clean.sh`) and then
+seeds it, so they can be run in any order and repeated. `clean.sh` on its own
+leaves the databases completely empty, seed included, which is useful for
+showing the schema with nothing in it.
 
 | Script | Shows | DDIA |
 |---|---|---|
