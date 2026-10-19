@@ -207,12 +207,14 @@ public class SagaOrchestrator {
     private void compensate(String sagaId, Deque<SagaStep> completed) {
         Timer timer = new Timer();
         logger.warn("{} compensating {} completed steps, in reverse", sagaId, completed.size());
-        int stepNo = 100 + completed.size();
+        // Numbered upwards as they pop, so reading saga_log in order shows the
+        // undo in the order it happened. Above 100 so lastCompleted ignores them.
+        int stepNo = 101;
         while (!completed.isEmpty()) {
             SagaStep step = completed.pop();
             try {
                 step.compensation().run();
-                sagaLog.record(sagaId, stepNo--, step.name(), "COMPENSATED", null, null);
+                sagaLog.record(sagaId, stepNo++, step.name(), "COMPENSATED", null, null);
             } catch (RuntimeException e) {
                 logger.error("{} compensation for {} failed, {}. This needs a retry.",
                         sagaId, step.name(), e.getMessage());

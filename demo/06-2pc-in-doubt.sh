@@ -7,8 +7,14 @@ say "arming the coordinator to crash after collecting all the votes"
 curl -s -X POST "$BOOKING/admin/fail-mode?mode=CRASH_AFTER_VOTES"; echo
 
 say "booking room 101"
-curl -s -X POST "$BOOKING/bookings/2pc?amount=120.00" -H "$JSON" \
-  -d "$(book 101 1 "$DAY 12:00:00" "$DAY 13:00:00")"; echo
+R=$(curl -s -X POST "$BOOKING/bookings/2pc?amount=120.00" -H "$JSON" \
+    -d "$(book 101 1 "$DAY 12:00:00" "$DAY 13:00:00")")
+echo "$R"
+TX=$(txid "$R")
+trace "$TX"
+note "three YES votes, then nothing. The coordinator never got to the decision."
+decision
+note "tx_log is still PREPARING. That is what in doubt means."
 
 say "every participant is now in doubt, and none may decide alone"
 curl -s "$BOOKING/admin/in-doubt"; echo
@@ -25,6 +31,8 @@ time $MYSQL -e "SET innodb_lock_wait_timeout=5; UPDATE paymentdb.wallets SET bal
 
 say "the coordinator comes back and reads its own log"
 curl -s -X POST "$BOOKING/admin/recover"; echo
+trace "$TX"
+decision
 note "no decision was ever written, so it aborts. DDIA p.359."
 
 say "the same write now"
